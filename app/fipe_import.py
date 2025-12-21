@@ -4,6 +4,7 @@ import pandas as pd
 from sqlalchemy import text
 from tqdm import tqdm
 from app import engine 
+from sqlalchemy.dialects.postgresql import insert
 
 def obter_marcas():
     url = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
@@ -103,10 +104,8 @@ def _limpar_valor(valor):
 
 def salvar_no_banco(df):
     if df.empty:
-        print("\nNenhum dado coletado. Nada será salvo no banco.")
+        print("\nNenhum dado coletado.")
         return
-
-    df = df.drop_duplicates(subset=["codigo_fipe", "ano_modelo", "combustivel"], keep="first")
 
     with engine.begin() as conn:
         conn.execute(text("""
@@ -120,12 +119,19 @@ def salvar_no_banco(df):
             valor FLOAT,
             codigo_fipe VARCHAR(20),
             sigla_combustivel VARCHAR(10),
-            data_consulta VARCHAR(50)
+            data_consulta VARCHAR(50),
+            CONSTRAINT unique_fipe UNIQUE (codigo_fipe, ano_modelo, combustivel)
         );
         """))
-    
-    df.to_sql("fipe_carros", engine, if_exists="append", index=False)
-    print(f"\n{len(df)} registros inseridos com sucesso no PostgreSQL.")
+
+        stmt = insert(text("fipe_carros")).values(df.to_dict(orient="records"))
+        stmt = stmt.on_conflict_do_nothing(
+            index_elements=["codigo_fipe", "ano_modelo", "combustivel"]
+        )
+
+        conn.execute(stmt)
+
+    print(f"{len(df)} registros inseridos com sucesso no PostgreSQL.")
 
 
 def importar_dados_fipe(limite_registros=1000):
