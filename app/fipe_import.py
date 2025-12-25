@@ -4,7 +4,6 @@ import pandas as pd
 from sqlalchemy import text
 from tqdm import tqdm
 from app import engine 
-from sqlalchemy.dialects.postgresql import insert
 
 def obter_marcas():
     url = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
@@ -39,7 +38,7 @@ def obter_detalhes(codigo_marca, codigo_modelo, codigo_ano):
     time.sleep(0.5)
     return resposta.json()
 
-def coletar_dados_fipe(limite_registros=1000):
+def coletar_dados_fipe(limite_registros=700):
     registros = []
     marcas = obter_marcas()
     contador = 0
@@ -124,12 +123,22 @@ def salvar_no_banco(df):
         );
         """))
 
-        stmt = insert(text("fipe_carros")).values(df.to_dict(orient="records"))
-        stmt = stmt.on_conflict_do_nothing(
-            index_elements=["codigo_fipe", "ano_modelo", "combustivel"]
+        insert_sql = text("""
+        INSERT INTO fipe_carros (
+          marca, modelo, ano_modelo, combustivel,
+          valor_str, valor, codigo_fipe,
+          sigla_combustivel, data_consulta
+        ) VALUES (
+          :marca, :modelo, :ano_modelo, :combustivel,
+          :valor_str, :valor, :codigo_fipe,
+          :sigla_combustivel, :data_consulta
         )
+        ON CONFLICT (codigo_fipe, ano_modelo, combustivel)
+        DO NOTHING
+        """)
 
-        conn.execute(stmt)
+        conn.execute(insert_sql, df.to_dict(orient="records"))
+
 
     print(f"{len(df)} registros inseridos com sucesso no PostgreSQL.")
 
