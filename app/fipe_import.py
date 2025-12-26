@@ -102,10 +102,6 @@ def _limpar_valor(valor):
         return None
 
 def salvar_no_banco(df):
-    if df.empty:
-        print("\nNenhum dado coletado.")
-        return
-
     with engine.begin() as conn:
         conn.execute(text("""
         CREATE TABLE IF NOT EXISTS fipe_carros (
@@ -123,24 +119,25 @@ def salvar_no_banco(df):
         );
         """))
 
+        if df.empty:
+            print("\nNenhum dado coletado. Tabela garantida.")
+            return
+
         insert_sql = text("""
         INSERT INTO fipe_carros (
-          marca, modelo, ano_modelo, combustivel,
-          valor_str, valor, codigo_fipe,
-          sigla_combustivel, data_consulta
+            marca, modelo, ano_modelo, combustivel,
+            valor_str, valor, codigo_fipe,
+            sigla_combustivel, data_consulta
         ) VALUES (
-          :marca, :modelo, :ano_modelo, :combustivel,
-          :valor_str, :valor, :codigo_fipe,
-          :sigla_combustivel, :data_consulta
+            :marca, :modelo, :ano_modelo, :combustivel,
+            :valor_str, :valor, :codigo_fipe,
+            :sigla_combustivel, :data_consulta
         )
         ON CONFLICT (codigo_fipe, ano_modelo, combustivel)
         DO NOTHING
         """)
 
         conn.execute(insert_sql, df.to_dict(orient="records"))
-
-
-    print(f"{len(df)} registros inseridos com sucesso no PostgreSQL.")
 
 
 def importar_dados_fipe(limite_registros=1000):
