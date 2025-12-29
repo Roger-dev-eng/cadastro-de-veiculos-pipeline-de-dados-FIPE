@@ -3,7 +3,8 @@ import time
 import pandas as pd
 from sqlalchemy import text
 from tqdm import tqdm
-from app import engine 
+from app import engine
+import numpy as np 
 
 def obter_marcas():
     url = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
@@ -38,7 +39,7 @@ def obter_detalhes(codigo_marca, codigo_modelo, codigo_ano):
     time.sleep(0.5)
     return resposta.json()
 
-def coletar_dados_fipe(limite_registros=700):
+def coletar_dados_fipe(limite_registros=30):
     registros = []
     marcas = obter_marcas()
     contador = 0
@@ -91,8 +92,6 @@ def coletar_dados_fipe(limite_registros=700):
     print(f"\nTotal de registros coletados: {len(df)}")
     return df
 
-
-
 def _limpar_valor(valor):
     if not valor:
         return None
@@ -137,10 +136,27 @@ def salvar_no_banco(df):
         DO NOTHING
         """)
 
+        df = df.copy()
+
+        df["ano_modelo"] = df["ano_modelo"].apply(
+            lambda x: int(x) if pd.notna(x) else None
+        )
+        df["valor"] = df["valor"].where(pd.notna(df["valor"]), None)
+
+        df = df[
+            df["codigo_fipe"].notna() &
+            df["ano_modelo"].notna() &
+            df["valor"].notna()
+        ]
+
+        if df.empty:
+            return
+
         conn.execute(insert_sql, df.to_dict(orient="records"))
 
+        print(f"{len(df)} registros inseridos com sucesso.")
 
-def importar_dados_fipe(limite_registros=1000):
+def importar_dados_fipe(limite_registros=30):
     df = coletar_dados_fipe(limite_registros)
     salvar_no_banco(df)
     print("\n Pipeline FIPE concluído com sucesso.")
