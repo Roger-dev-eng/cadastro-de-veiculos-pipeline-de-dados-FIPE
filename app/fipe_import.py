@@ -39,7 +39,7 @@ def obter_detalhes(codigo_marca, codigo_modelo, codigo_ano):
     time.sleep(0.5)
     return resposta.json()
 
-def coletar_dados_fipe(limite_registros=30):
+def coletar_dados_fipe(limite_registros=650):
     registros = []
     marcas = obter_marcas()
     contador = 0
@@ -156,10 +156,11 @@ def salvar_no_banco(df):
 
         print(f"{len(df)} registros inseridos com sucesso.")
 
-def importar_dados_fipe(limite_registros=30):
+def importar_dados_fipe(limite_registros=650):
     df = coletar_dados_fipe(limite_registros)
     salvar_no_banco(df)
     print("\n Pipeline FIPE concluído com sucesso.")
+    print("Observe as análise em notebooks/analise_fipe.ipynb")
 
 if __name__ == "__main__":
     importar_dados_fipe()
