@@ -37,15 +37,9 @@ cadastro-veiculos/
 │   └── utils/
 │         ├── __init__.py     # Permite importar funções de utilidade
 │         ├── helpers.py      # Tem funções de limpeza, validação e logs
-│
-├── CRUD/                     # Permite a criação de um próprio  banco de dados para cadastrar, listar, atualizar e remover carros.
-│     └── cadastro.py
-│     └── __init__.py
-│     └── database.py
-│     └── main.py
 │ 
 ├── config/
-│   ├── .db_config.py         # Carrega e valida a string de conexão com o PostgreSQL
+│   ├── db_config.py         # Carrega e valida a string de conexão com o PostgreSQL
 │
 ├── data/                     # Armazena logs
 │
@@ -53,6 +47,8 @@ cadastro-veiculos/
 │   └── analise_fipe.ipynb    # Notebook para visualizações e análises dos dados
 │
 ├── requirements.txt
+│
+├── .env
 │
 └── README.md
 ```

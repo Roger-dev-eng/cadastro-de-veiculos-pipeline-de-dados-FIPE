@@ -1,16 +1,23 @@
 import requests
-import time
+from requests.adapters import HTTPAdapter, Retry
 import pandas as pd
 from sqlalchemy import text
-from tqdm import tqdm
 from app import engine
-import numpy as np 
+
+session = requests.Session()
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=0.3,
+    status_forcelist=[429,500,502,503,504]
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+session.mount("https://", adapter)
+session.mount("http://", adapter)
 
 def obter_marcas():
     url = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
     try:
-        resposta = requests.get(url)
-        time.sleep(0.5)
+        resposta = session.get(url, timeout=10)
         resposta.raise_for_status()
         dados = resposta.json()
         if isinstance(dados, list) and all(isinstance(m, dict) for m in dados):
@@ -23,20 +30,17 @@ def obter_marcas():
 
 def obter_modelos(codigo_marca):
     url = f"https://parallelum.com.br/fipe/api/v1/carros/marcas/{codigo_marca}/modelos"
-    resposta = requests.get(url)
-    time.sleep(0.5)
+    resposta = session.get(url, timeout=10)
     return resposta.json().get("modelos", [])
 
 def obter_anos(codigo_marca, codigo_modelo):
     url = f"https://parallelum.com.br/fipe/api/v1/carros/marcas/{codigo_marca}/modelos/{codigo_modelo}/anos"
-    resposta = requests.get(url)
-    time.sleep(0.5)
+    resposta = session.get(url, timeout=10)
     return resposta.json()
 
 def obter_detalhes(codigo_marca, codigo_modelo, codigo_ano):
     url = f"https://parallelum.com.br/fipe/api/v1/carros/marcas/{codigo_marca}/modelos/{codigo_modelo}/anos/{codigo_ano}"
-    resposta = requests.get(url)
-    time.sleep(0.5)
+    resposta = session.get(url, timeout=10)
     return resposta.json()
 
 def coletar_dados_fipe(limite_registros=650):
@@ -65,8 +69,11 @@ def coletar_dados_fipe(limite_registros=650):
                 try:
                     detalhe = obter_detalhes(cod_marca, cod_modelo, cod_ano)
                     ano_modelo = detalhe.get("AnoModelo")
-                    if isinstance(ano_modelo, int) and ano_modelo > 2025:
-                        ano_modelo = None
+                    if isinstance(ano_modelo, int):
+                        if not (1800 <=ano_modelo <=2026):
+                          ano_modelo = None
+                    else:
+                        ano_modelo = None      
                         
                     registros.append({
                         "marca": nome_marca,
@@ -84,8 +91,11 @@ def coletar_dados_fipe(limite_registros=650):
                     if contador >= limite_registros:
                         print(f"\nLimite de {limite_registros} registros atingido.")
                         return pd.DataFrame(registros)
+                except requests.RequestException as e:
+                    print(f"API Error [{nome_marca} {nome_modelo}]: {e}")
+                    continue
                 except Exception as e:
-                    print(f"Erro ao obter detalhes de {nome_marca} {nome_modelo} ({cod_ano}): {e}")
+                    print(f"Unexpected error [{nome_marca} {nome_modelo}]: {e}")
                     continue
 
     df = pd.DataFrame(registros)
@@ -96,8 +106,9 @@ def _limpar_valor(valor):
     if not valor:
         return None
     try:
-        return float(valor.replace("R$", "").replace(".", "").replace(",", ".").strip())
-    except:
+        limpo = valor.replace("R$", "").replace(".", "").replace(",", ".").strip()
+        return float(limpo)
+    except (ValueError, AttributeError):
         return None
 
 def salvar_no_banco(df):
@@ -121,6 +132,25 @@ def salvar_no_banco(df):
         if df.empty:
             print("\nNenhum dado coletado. Tabela garantida.")
             return
+        
+        df = df.copy()
+        df["ano_modelo"] = df["ano_modelo"].apply(
+            lambda x: int(x) if pd.notna(x) else None
+        )
+        df["valor"] = df["valor"].where(pd.notna(df["valor"]), None)
+
+        df = df [
+            df["codigo_fipe"].notna() &
+            df["ano_modelo"].notna() &
+            df["valor"].notna()
+        ]
+
+        if df.empty:
+            print("\nNenhun dado válido após filtros.")
+            return
+
+        batch_size = 100
+        total_inserido = 0    
 
         insert_sql = text("""
         INSERT INTO fipe_carros (
@@ -136,25 +166,16 @@ def salvar_no_banco(df):
         DO NOTHING
         """)
 
-        df = df.copy()
-
-        df["ano_modelo"] = df["ano_modelo"].apply(
-            lambda x: int(x) if pd.notna(x) else None
-        )
-        df["valor"] = df["valor"].where(pd.notna(df["valor"]), None)
-
-        df = df[
-            df["codigo_fipe"].notna() &
-            df["ano_modelo"].notna() &
-            df["valor"].notna()
-        ]
-
-        if df.empty:
-            return
-
-        conn.execute(insert_sql, df.to_dict(orient="records"))
-
-        print(f"{len(df)} registros inseridos com sucesso.")
+        for i in range(0, len(df), batch_size):
+            batch = df.iloc[i:i + batch_size]
+            try:
+                conn.execute(insert_sql,batch.to_dict(orient="records"))
+                total_inserido += len(batch)
+                print(f"Batch {i//batch_size + 1}: {len(batch)} registros", end="\r")
+            except Exception as e:
+                print(f"\n Erro no batch {i//batch_size +1}: {e}")
+                continue
+        print(f"\n Total inserido: {total_inserido} registros")        
 
 def importar_dados_fipe(limite_registros=650):
     df = coletar_dados_fipe(limite_registros)
