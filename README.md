@@ -6,7 +6,7 @@
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Explicação dos principais componentes](#explicação-dos-principais-componentes)
 - [Resultados e análises](#resultados-e-análises)
-- [Exemplos](#exemplos)
+- [Dados analisados](#dados-analisados)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
 
 
@@ -33,18 +33,19 @@ cadastro-veiculos/
 ├── app/
 │   ├── __init__.py           # Inicializa a conexão com o banco PostgreSQL
 │   ├── fipe_import.py        # Pipeline de coleta e inserção de dados da API FIPE
-│   ├── analysis.py           # Funções de análise e consultas SQL
 │   └── utils/
 │         ├── __init__.py     # Permite importar funções de utilidade
-│         ├── helpers.py      # Tem funções de limpeza, validação e logs
+│         ├── funções.py      # Tem funções de limpeza, validação e logs
 │ 
 ├── config/
-│   ├── db_config.py         # Carrega e valida a string de conexão com o PostgreSQL
+│   ├── db_config.py          # Carrega e valida a string de conexão com o PostgreSQL
 │
-├── data/                     # Armazena logs
+├── logs/                     # Armazena logs
 │
 ├── notebooks/
 │   └── analise_fipe.ipynb    # Notebook para visualizações e análises dos dados
+│
+├── run.py                    # Executa toda a pipeline
 │
 ├── requirements.txt
 │
@@ -66,13 +67,7 @@ Responsável por:
 - Criar a tabela `fipe_carros` caso não exista.
 - Inserir os dados tratados no banco PostgreSQL.
 
-#### `analysis.py`
-Contém consultas SQL e funções de análise, como:
-- Cálculo do **preço médio por marca**.
-- Cálculo do **preço médio por tipo de combustível**.
-- Retorno de DataFrames prontos para visualização.
-
-#### `visualization.ipynb`
+#### `analise_fipe.ipynb`
 Notebook com:
 - Conexão ao banco de dados.
 - Leitura dos dados FIPE armazenados.
@@ -102,7 +97,7 @@ Os dados são persistidos na tabela **`fipe_carros`** do PostgreSQL, contendo in
 
 ---
 
-## Exemplos
+## Dados analisados
 
 ### Média de Preço por Marca
 
