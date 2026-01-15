@@ -99,31 +99,40 @@ Os dados são persistidos na tabela **`fipe_carros`** do PostgreSQL, contendo in
 
 ## Dados analisados
 
-### Média de Preço por Marca
+### Dados brutos
 
-| Marca      | Preço Médio (R$) | Total de Modelos |
-|------------|------------------|------------------|
-| Agrale     | 213.013,96       | 85              |
-| Acura      | 23.885,73        | 15              |
-| Audi       | 180.450,20       | 342             |
-| BMW        | 195.320,50       | 278             |
-| Chevrolet  | 85.430,18        | 1.245           |
-| Fiat       | 68.920,45        | 987             |
-| Ford       | 92.150,33        | 856             |
-| Honda      | 110.280,67       | 423             |
-| Hyundai    | 95.670,89        | 512             |
-| Toyota     | 125.890,12       | 645             |
+| id  | marca  | modelo                                   | ano_modelo | combustivel | valor_str     | valor    | codigo_fipe | sigla_combustivel | data_consulta |
+|-----|--------|------------------------------------------|------------|-------------|---------------|----------|-------------|-------------------|---------------|
+| 84  | Acura  | Integra GS 1.8                           | 1992       | Gasolina    | R$ 10.963,00  | 10963.0  | 038003-2    | G                 | None          |
+| 85  | Acura  | Integra GS 1.8                           | 1991       | Gasolina    | R$ 10.241,00  | 10241.0  | 038003-2    | G                 | None          |
+| 86  | Acura  | Legend 3.2/3.5                          | 1998       | Gasolina    | R$ 25.096,00  | 25096.0  | 038002-4    | G                 | None          |
+| 87  | Acura  | Legend 3.2/3.5                          | 1997       | Gasolina    | R$ 22.312,00  | 22312.0  | 038002-4    | G                 | None          |
+| 88  | Acura  | Legend 3.2/3.5                          | 1996       | Gasolina    | R$ 20.981,00  | 20981.0  | 038002-4    | G                 | None          |
+| 89  | Acura  | Legend 3.2/3.5                          | 1995       | Gasolina    | R$ 18.857,00  | 18857.0  | 038002-4    | G                 | None          |
+| 90  | Acura  | Legend 3.2/3.5                          | 1994       | Gasolina    | R$ 18.048,00  | 18048.0  | 038002-4    | G                 | None          |
+| 91  | Acura  | Legend 3.2/3.5                          | 1993       | Gasolina    | R$ 16.087,00  | 16087.0  | 038002-4    | G                 | None          |
+| 92  | Acura  | Legend 3.2/3.5                          | 1992       | Gasolina    | R$ 14.625,00  | 14625.0  | 038002-4    | G                 | None          |
+| 93  | Acura  | Legend 3.2/3.5                          | 1991       | Gasolina    | R$ 14.049,00  | 14049.0  | 038002-4    | G                 | None          |
+| 94  | Acura  | NSX 3.0                                 | 1995       | Gasolina    | R$ 40.508,00  | 40508.0  | 038001-6    | G                 | None          |
+| 95  | Acura  | NSX 3.0                                 | 1994       | Gasolina    | R$ 39.083,00  | 39083.0  | 038001-6    | G                 | None          |
+| 96  | Acura  | NSX 3.0                                 | 1993       | Gasolina    | R$ 37.783,00  | 37783.0  | 038001-6    | G                 | None          |
+| 97  | Acura  | NSX 3.0                                 | 1992       | Gasolina    | R$ 36.106,00  | 36106.0  | 038001-6    | G                 | None          |
+| 98  | Acura  | NSX 3.0                                 | 1991       | Gasolina    | R$ 33.002,00  | 33002.0  | 038001-6    | G                 | None          |
+| 99  | Agrale | MARRUÁ 2.8 12V 132cv TDI Diesel          | 2007       | Diesel      | R$ 47.681,00  | 47681.0  | 060001-6    | D                 | None          |
+| 100 | Agrale | MARRUÁ 2.8 12V 132cv TDI Diesel          | 2006       | Diesel      | R$ 46.251,00  | 46251.0  | 060001-6    | D                 | None          |
+| 101 | Agrale | MARRUÁ 2.8 12V 132cv TDI Diesel          | 2005       | Diesel      | R$ 45.122,00  | 45122.0  | 060001-6    | D                 | None          |
+| 102 | Agrale | MARRUÁ 2.8 12V 132cv TDI Diesel          | 2004       | Diesel      | R$ 37.484,00  | 37484.0  | 060001-6    | D                 | None          |
+| 103 | Agrale | MARRUÁ AM 100 2.8 CS TDI Diesel          | 2015       | Diesel      | R$ 107.264,00 | 107264.0 | 060003-2    | D                 | None          |
 
-### Média de Preço por Tipo de Combustível
 
-| Combustível | Preço Médio (R$) | Total de Veículos |
-|-------------|------------------|-------------------|
-| Diesel      | 213.013,96       | 85               |
-| Gasolina    | 89.450,32        | 4.823            |
-| Flex        | 76.320,15        | 3.567            |
-| Elétrico    | 285.670,00       | 42               |
-| Híbrido     | 198.450,50       | 156              |
-| GNV         | 45.230,80        | 234              |
+### Preço médio por marca
+![exemplo1](https://private-user-images.githubusercontent.com/205425623/536246290-d3cebc83-52a8-4253-8819-46257b9f766a.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Njg0ODU0NTksIm5iZiI6MTc2ODQ4NTE1OSwicGF0aCI6Ii8yMDU0MjU2MjMvNTM2MjQ2MjkwLWQzY2ViYzgzLTUyYTgtNDI1My04ODE5LTQ2MjU3YjlmNzY2YS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwMTE1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDExNVQxMzUyMzlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1hOTQwMzYxNjg1N2IxYmRkNTVhY2Y0Y2QxODliOTIwZTJlZmM4OGM3NGQxZThjYTk0ZjRjNzA1YmZlZWFjNzkzJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.zM6KrtYVdhTdfq2hpJdDgdFI0jeqbmx3Jg3FW1tgXQ0)
+
+### Evolução do preço médio por ano
+![exemplo3](https://private-user-images.githubusercontent.com/205425623/536250412-20f8de95-c3c8-49c2-87f8-bc4215ae0377.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Njg0ODYwNDEsIm5iZiI6MTc2ODQ4NTc0MSwicGF0aCI6Ii8yMDU0MjU2MjMvNTM2MjUwNDEyLTIwZjhkZTk1LWMzYzgtNDljMi04N2Y4LWJjNDIxNWFlMDM3Ny5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwMTE1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDExNVQxNDAyMjFaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1mMmRmYjgwMTAzNmI4OTUzZjA3MDRlMWFjZmE5NzhiMTIyODA5ZWI3NjkzZTVmMTg1NGFhMjc0NDBlMmQ5ZjFjJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.SLm2DOPontSflrm_pAXTRT1zgtFlJq9fVia6lrYELdw)
+
+### Preço médio por combustível
+![exemplo2](https://private-user-images.githubusercontent.com/205425623/536246502-917a98b5-68fd-4df6-b9f0-229a0033f4e7.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Njg0ODU5NzIsIm5iZiI6MTc2ODQ4NTY3MiwicGF0aCI6Ii8yMDU0MjU2MjMvNTM2MjQ2NTAyLTkxN2E5OGI1LTY4ZmQtNGRmNi1iOWYwLTIyOWEwMDMzZjRlNy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwMTE1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDExNVQxNDAxMTJaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1kZWY0NGI2ZmMwMWMyM2EzMTViZTkwNWUzZGQ2OGViMThkMDA5MmU4MTI5OTZkYzI3NzRjMDM5OTRhODY3M2M2JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9._s2Ax3wbFq2kpc9T-VlLxUIW0OeaX7TJBMSYc6Oh9SM)
 
 
 ##  Tecnologias Utilizadas

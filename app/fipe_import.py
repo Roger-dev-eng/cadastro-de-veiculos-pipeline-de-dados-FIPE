@@ -63,7 +63,7 @@ def obter_detalhes(codigo_marca, codigo_modelo, codigo_ano):
         return {}
 
 
-def coletar_dados_fipe(limite_registros=650):
+def coletar_dados_fipe(limite_registros=370):
     registros = []
     marcas = obter_marcas()
     contador = 0
@@ -212,7 +212,7 @@ def salvar_no_banco(df):
         print(f"\n Total inserido: {total_inserido} registros")
 
 
-def importar_dados_fipe(limite_registros=650):
+def importar_dados_fipe(limite_registros=370):
     """Função principal: coleta e salva dados da FIPE"""
     print("\n" + "="*60)
     print(" PIPELINE FIPE - COLETA DE DADOS DE VEÍCULOS")
