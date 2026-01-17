@@ -31,19 +31,23 @@ A pipeline foi construída em **Python**, utilizando **PostgreSQL** como banco d
 cadastro-veiculos/
 │
 ├── app/
-│   ├── __init__.py           # Inicializa a conexão com o banco PostgreSQL
-│   ├── fipe_import.py        # Pipeline de coleta e inserção de dados da API FIPE
+│   ├── __init__.py
+│   ├── clients/
+│   │   └── __init__.py
+│   ├── db/
+│   │   ├── __init__.py
+│   │   └── engine.py         # Inicializa a conexao com o PostgreSQL
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   └── fipe_import.py    # Pipeline de coleta e insercao de dados da API FIPE
 │   └── utils/
-│         ├── __init__.py     # Permite importar funções de utilidade
-│         ├── funções.py      # Tem funções de limpeza, validação e logs
-│ 
-├── config/
-│   ├── db_config.py          # Carrega e valida a string de conexão com o PostgreSQL
+│       ├── __init__.py
+│       └── funcoes.py        # Funcoes de limpeza, validacao e logs
 │
-├── logs/                     # Armazena logs
+├── logs/                     # Armazena logs e cache
 │
 ├── notebooks/
-│   └── analise_fipe.ipynb    # Notebook para visualizações e análises dos dados
+│   └── analise_fipe.ipynb    # Notebook para visualizacoes e analises dos dados
 │
 ├── run.py                    # Executa toda a pipeline
 │
@@ -54,30 +58,34 @@ cadastro-veiculos/
 └── README.md
 ```
 
+
 ---
 
 
 ## Explicação dos principais componentes
 
-#### `fipe_import.py`
+#### `app/pipeline/fipe_import.py`
 Responsável por:
 - Coletar dados da **API FIPE**.
-- Tratar os dados (limpeza de campos, substituição de anos inválidos por `N/A`, etc.).
+- Tratar os dados (limpeza de campos, substituicao de anos invalidos por `N/A`, etc.).
 - Evitar duplicidade ao inserir no banco.
-- Criar a tabela `fipe_carros` caso não exista.
+- Criar a tabela `fipe_carros` caso nao exista.
 - Inserir os dados tratados no banco PostgreSQL.
 
-#### `analise_fipe.ipynb`
+
+#### `notebooks/analise_fipe.ipynb`
 Notebook com:
-- Conexão ao banco de dados.
+- Conexao ao banco de dados.
 - Leitura dos dados FIPE armazenados.
-- Visualizações com **Matplotlib**, **Seaborn** e **Plotly** (ex.: distribuição de preços, comparação por combustível, etc.).
+- Visualizacoes com **Matplotlib**, **Seaborn** e **Plotly** (ex.: distribuicao de precos, comparacao por combustivel, etc.).
+
 
 #### `run.py`
 Executa a pipeline completa, incluindo:
 1. Coleta dos dados FIPE.
 2. Armazenamento no banco.
-3. Execução das análises de preço médio.
+3. Execucao das analises de preco medio.
+
 
 ---
 
