@@ -348,7 +348,7 @@ def importar_dados_fipe(limite_registros=370):
     
     print("\n" + "="*60)
     print(" Pipeline FIPE concluído com sucesso!")
-    print(" Veja análises em: notebooks/analise_fipe.ipynb")
+    print(" Veja análises no dashboard Streamlit: app/dashboard/dashboard.py")
     print("="*60 + "\n")
 
 

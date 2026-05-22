@@ -35,6 +35,11 @@ cadastro-veiculos/
 │   ├── db/
 │   │   ├── __init__.py
 │   │   └── engine.py         # Inicializa a conexão com o PostgreSQL
+│   ├── dashboard/
+│   │   ├── __init__.py
+│   │   ├── charts.py         # Gráficos interativos do dashboard
+│   │   ├── dashboard.py      # Interface Streamlit
+│   │   └── queries.py        # Consultas ao banco para o dashboard
 │   ├── pipeline/
 │   │   ├── __init__.py
 │   │   └── fipe_import.py    # Pipeline de coleta e inserção de dados da API FIPE
@@ -43,9 +48,6 @@ cadastro-veiculos/
 │       └── funcoes.py        # Funções de limpeza, validação e logs
 │
 ├── logs/                     # Armazena logs e cache
-│
-├── notebooks/
-│   └── analise_fipe.ipynb    # Notebook para visualizações e análises dos dados
 │
 ├── run.py                    # Executa toda a pipeline
 │
@@ -71,21 +73,43 @@ Responsável por:
 - Inserir os dados tratados no banco PostgreSQL.
 
 
-#### `notebooks/analise_fipe.ipynb`
-Notebook com:
-- Conexão ao banco de dados.
-- Leitura dos dados FIPE armazenados.
-- Visualizações com **Matplotlib** e **Seaborn** (ex.: distribuição de preços e comparação por combustível).
+#### `app/dashboard/dashboard.py`
+Interface web em **Streamlit** com:
+- Filtros por marca, combustível e ano.
+- Indicadores de volume, marcas, preço médio e maior preço.
+- Gráficos interativos com **Plotly**.
+- Tabela dos registros filtrados.
+- Botão opcional para executar a importação dos dados FIPE.
 
 
 #### `run.py`
 Executa a pipeline completa, incluindo:
 1. Coleta dos dados FIPE.
 2. Armazenamento no banco.
-3. Geração da base utilizada nas análises do notebook.
+3. Geração da base utilizada no dashboard Streamlit.
 
 
 ---
+
+## Como executar
+
+Instale as dependências:
+
+```bash
+pip install -r requirements.txt
+```
+
+Execute a pipeline para carregar dados no PostgreSQL:
+
+```bash
+python run.py
+```
+
+Abra o dashboard Streamlit:
+
+```bash
+streamlit run app/dashboard/dashboard.py
+```
 
 ## Resultados e Análises
 
@@ -152,7 +176,8 @@ Os dados são persistidos na tabela **`fipe_carros`** do PostgreSQL, contendo in
 | **Requests**  | 2.31+   | Cliente HTTP para consumo da API FIPE     |
 | **Matplotlib**  | 3.8+    | Criação de gráficos estáticos          |
 | **Seaborn**     | 0.13+   | Visualizações estatísticas avançadas   |
-| **Jupyter**     | 1.0+    | Ambiente de notebooks interativos      |
+| **Streamlit**   | 1.57+   | Interface web e dashboard interativo   |
+| **Plotly**      | 6.7+    | Gráficos interativos                   |
 | **python-dotenv**| 1.0+    | Gerenciamento de variáveis de ambiente |
 | **psycopg2-binary** | 2.9+ | Driver PostgreSQL para Python          |
 ---
