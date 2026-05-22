@@ -1,8 +1,12 @@
 import re
 import logging
+from pathlib import Path
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
-    filename="logs/logs.txt",
+    filename=LOG_DIR / "logs.txt",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )

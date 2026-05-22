@@ -1,7 +1,7 @@
 # Cadastro de Veículos - Pipeline de Dados FIPE
 
 ## Conteúdo
-- [Descrição](#Descrição)
+- [Descrição](#descrição)
 - [Objetivo](#objetivo)
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Explicação dos principais componentes](#explicação-dos-principais-componentes)
@@ -32,28 +32,26 @@ cadastro-veiculos/
 │
 ├── app/
 │   ├── __init__.py
-│   ├── clients/
-│   │   └── __init__.py
 │   ├── db/
 │   │   ├── __init__.py
-│   │   └── engine.py         # Inicializa a conexao com o PostgreSQL
+│   │   └── engine.py         # Inicializa a conexão com o PostgreSQL
 │   ├── pipeline/
 │   │   ├── __init__.py
-│   │   └── fipe_import.py    # Pipeline de coleta e insercao de dados da API FIPE
+│   │   └── fipe_import.py    # Pipeline de coleta e inserção de dados da API FIPE
 │   └── utils/
 │       ├── __init__.py
-│       └── funcoes.py        # Funcoes de limpeza, validacao e logs
+│       └── funcoes.py        # Funções de limpeza, validação e logs
 │
 ├── logs/                     # Armazena logs e cache
 │
 ├── notebooks/
-│   └── analise_fipe.ipynb    # Notebook para visualizacoes e analises dos dados
+│   └── analise_fipe.ipynb    # Notebook para visualizações e análises dos dados
 │
 ├── run.py                    # Executa toda a pipeline
 │
 ├── requirements.txt
 │
-├── .env
+├── .env                      # Configuração local das variáveis de ambiente
 │
 └── README.md
 ```
@@ -67,24 +65,24 @@ cadastro-veiculos/
 #### `app/pipeline/fipe_import.py`
 Responsável por:
 - Coletar dados da **API FIPE**.
-- Tratar os dados (limpeza de campos, substituicao de anos invalidos por `N/A`, etc.).
+- Tratar os dados, incluindo limpeza de valores monetários e validação de anos.
 - Evitar duplicidade ao inserir no banco.
-- Criar a tabela `fipe_carros` caso nao exista.
+- Criar a tabela `fipe_carros` caso não exista.
 - Inserir os dados tratados no banco PostgreSQL.
 
 
 #### `notebooks/analise_fipe.ipynb`
 Notebook com:
-- Conexao ao banco de dados.
+- Conexão ao banco de dados.
 - Leitura dos dados FIPE armazenados.
-- Visualizacoes com **Matplotlib**, **Seaborn** e **Plotly** (ex.: distribuicao de precos, comparacao por combustivel, etc.).
+- Visualizações com **Matplotlib** e **Seaborn** (ex.: distribuição de preços e comparação por combustível).
 
 
 #### `run.py`
 Executa a pipeline completa, incluindo:
 1. Coleta dos dados FIPE.
 2. Armazenamento no banco.
-3. Execucao das analises de preco medio.
+3. Geração da base utilizada nas análises do notebook.
 
 
 ---
@@ -154,10 +152,7 @@ Os dados são persistidos na tabela **`fipe_carros`** do PostgreSQL, contendo in
 | **Requests**  | 2.31+   | Cliente HTTP para consumo da API FIPE     |
 | **Matplotlib**  | 3.8+    | Criação de gráficos estáticos          |
 | **Seaborn**     | 0.13+   | Visualizações estatísticas avançadas   |
-| **Plotly**      | 5.18+   | Gráficos interativos (opcional)        |
 | **Jupyter**     | 1.0+    | Ambiente de notebooks interativos      |
-| **tqdm**         | 4.66+   | Barras de progresso para ETL           |
 | **python-dotenv**| 1.0+    | Gerenciamento de variáveis de ambiente |
-| **psycopg2**     | 2.9+    | Driver PostgreSQL para Python          |
-| **loguru**       | 0.7+    | Sistema de logs estruturado            |
+| **psycopg2-binary** | 2.9+ | Driver PostgreSQL para Python          |
 ---
