@@ -1,7 +1,20 @@
 import plotly.express as px
 
 
-COLOR_SEQUENCE = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#dc2626", "#0891b2"]
+COLOR_SEQUENCE = ["#2563eb", "#059669", "#ea580c", "#7c3aed", "#dc2626", "#0891b2"]
+
+
+def apply_chart_layout(fig, height):
+    fig.update_layout(
+        height=height,
+        template="plotly_white",
+        margin={"l": 8, "r": 8, "t": 20, "b": 8},
+        font={"family": "Inter, Segoe UI, sans-serif", "size": 13},
+        hoverlabel={"font_size": 13},
+        xaxis={"showgrid": True, "gridcolor": "#e5e7eb", "zeroline": False},
+        yaxis={"showgrid": False, "zeroline": False},
+    )
+    return fig
 
 
 def price_by_brand(df, limit=15):
@@ -19,8 +32,8 @@ def price_by_brand(df, limit=15):
         labels={"valor": "Preco medio (R$)", "marca": "Marca"},
         color_discrete_sequence=[COLOR_SEQUENCE[0]],
     )
-    fig.update_layout(yaxis={"categoryorder": "total ascending"}, height=440)
-    return fig
+    fig.update_layout(yaxis={"categoryorder": "total ascending"})
+    return apply_chart_layout(fig, 430)
 
 
 def price_by_year(df):
@@ -37,8 +50,7 @@ def price_by_year(df):
         labels={"ano_modelo": "Ano modelo", "valor": "Preco medio (R$)"},
         color_discrete_sequence=[COLOR_SEQUENCE[1]],
     )
-    fig.update_layout(height=380)
-    return fig
+    return apply_chart_layout(fig, 360)
 
 
 def price_by_fuel(df):
@@ -55,8 +67,8 @@ def price_by_fuel(df):
         color="combustivel",
         color_discrete_sequence=COLOR_SEQUENCE,
     )
-    fig.update_layout(showlegend=False, height=360)
-    return fig
+    fig.update_layout(showlegend=False)
+    return apply_chart_layout(fig, 340)
 
 
 def price_distribution(df):
@@ -67,5 +79,4 @@ def price_distribution(df):
         labels={"valor": "Preco FIPE (R$)"},
         color_discrete_sequence=[COLOR_SEQUENCE[5]],
     )
-    fig.update_layout(height=360)
-    return fig
+    return apply_chart_layout(fig, 340)

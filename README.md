@@ -53,6 +53,10 @@ cadastro-veiculos/
 │
 ├── requirements.txt
 │
+├── pyproject.toml            # Metadados e dependências do projeto
+│
+├── .python-version           # Versão do Python (pyenv)
+│
 ├── .env                      # Configuração local das variáveis de ambiente
 │
 └── README.md
@@ -75,18 +79,19 @@ Responsável por:
 
 #### `app/dashboard/dashboard.py`
 Interface web em **Streamlit** com:
+- Painel visual para executar a coleta FIPE sem depender do terminal.
+- Acompanhamento de progresso, etapa atual, marcas processadas, registros coletados e batches gravados.
+- Resumo final com registros coletados, válidos, novos inseridos e já existentes.
 - Filtros por marca, combustível e ano.
 - Indicadores de volume, marcas, preço médio e maior preço.
 - Gráficos interativos com **Plotly**.
 - Tabela dos registros filtrados.
-- Botão opcional para executar a importação dos dados FIPE.
 
 
 #### `run.py`
 Executa a pipeline completa, incluindo:
 1. Coleta dos dados FIPE.
 2. Armazenamento no banco.
-3. Geração da base utilizada no dashboard Streamlit.
 
 
 ---
@@ -109,6 +114,46 @@ Abra o dashboard Streamlit:
 
 ```bash
 streamlit run app/dashboard/dashboard.py
+```
+
+## Como executar com Docker
+
+O projeto pode ser executado com Docker Compose usando o arquivo `.env` atual.
+
+O `.env` deve conter as variáveis usadas pelo PostgreSQL do Docker:
+
+```env
+POSTGRES_DB=nome_do_banco
+POSTGRES_USER=usuario_do_banco
+POSTGRES_PASSWORD=sua_senha_local
+```
+
+Para uso local fora do Docker, mantenha também a `DATABASE_URL` apontando para `localhost`:
+
+```env
+DATABASE_URL=postgresql+psycopg2://usuario_do_banco:sua_senha_local@localhost:5432/nome_do_banco
+```
+
+Variáveis opcionais de configuração:
+
+```env
+RECORDS_LIMIT=650       # Limite de registros coletados (padrão: 600)
+FIPE_TIMEOUT=10         # Timeout em segundos para requisições à API
+FIPE_SLEEP_TIME=0.3     # Pausa entre requisições (reserva para uso futuro)
+```
+
+Dentro do Docker, o `docker-compose.yml` monta a `DATABASE_URL` automaticamente usando o host interno `db`.
+
+Com o Docker Desktop aberto, execute:
+
+```bash
+docker compose up --build
+```
+
+Depois acesse:
+
+```text
+http://localhost:8501
 ```
 
 ## Resultados e Análises

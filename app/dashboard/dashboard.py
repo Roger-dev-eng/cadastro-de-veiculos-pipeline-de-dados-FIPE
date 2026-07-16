@@ -42,8 +42,148 @@ def format_currency(value):
     return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def render_page_style():
+    st.markdown(
+        """
+        <style>
+            .block-container {
+                padding-top: 1.5rem;
+                padding-bottom: 2rem;
+                max-width: 1280px;
+            }
+
+            [data-testid="stSidebar"] {
+                background: #f8fafc;
+                border-right: 1px solid #e5e7eb;
+            }
+
+            .page-header {
+                padding: 0.2rem 0 1.1rem 0;
+                border-bottom: 1px solid #e5e7eb;
+                color: #0f172a;
+                margin-bottom: 1.1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                line-height: 1.15;
+                margin: 0 0 0.35rem 0;
+                letter-spacing: 0;
+            }
+
+            .page-header p {
+                margin: 0;
+                color: #475569;
+                font-size: 0.98rem;
+            }
+
+            .kpi-card {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                background: #ffffff;
+                padding: 1rem 1.05rem;
+                min-height: 104px;
+            }
+
+            .kpi-label {
+                color: #64748b;
+                font-size: 0.78rem;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                margin-bottom: 0.45rem;
+            }
+
+            .kpi-value {
+                color: #0f172a;
+                font-size: 1.55rem;
+                font-weight: 760;
+                line-height: 1.15;
+                letter-spacing: 0;
+            }
+
+            .section-title {
+                color: #0f172a;
+                font-size: 1.05rem;
+                font-weight: 720;
+                margin: 0.3rem 0 0.65rem 0;
+            }
+
+            div[data-testid="stMetric"] {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 1rem;
+                background: #ffffff;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_header():
+    st.markdown(
+        """
+        <div class="page-header">
+            <h1>Dashboard FIPE</h1>
+            <p>Analise de precos, marcas, modelos e combustiveis a partir dos dados coletados da API FIPE.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_kpi(label, value):
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-label">{label}</div>
+            <div class="kpi-value">{value}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_pipeline_summary(summary):
+    if not summary:
+        return
+
+    st.markdown('<div class="section-title">Resumo da ultima execucao</div>', unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        render_kpi("Coletados", f"{summary.get('collected', 0):,}".replace(",", "."))
+    with col2:
+        render_kpi("Validos", f"{summary.get('valid', 0):,}".replace(",", "."))
+    with col3:
+        render_kpi("Novos inseridos", f"{summary.get('inserted', 0):,}".replace(",", "."))
+    with col4:
+        render_kpi("Ja existentes", f"{summary.get('existing', 0):,}".replace(",", "."))
+
+
+def pipeline_progress_ratio(update):
+    event = update.get("event")
+    current = update.get("current") or 0
+    total = update.get("total") or 1
+
+    if event == "start":
+        return 0.02
+    if event in {"collect_start", "brand", "records", "collect_limit", "collect_done"}:
+        return min(0.78, 0.08 + (current / total) * 0.70)
+    if event == "save_start":
+        return 0.82
+    if event == "save_batch":
+        return min(0.97, 0.82 + (current / total) * 0.15)
+    if event in {"save_done", "done"}:
+        return 1.0
+    return 0.5
+
+
 def apply_filters(df):
     with st.sidebar:
+        st.title("FIPE")
+        st.caption("Filtros e coleta")
+        st.divider()
         st.header("Filtros")
 
         brands = sorted(df["marca"].dropna().unique())
@@ -68,31 +208,67 @@ def apply_filters(df):
 
 
 def render_pipeline_action():
-    with st.sidebar:
-        st.divider()
-        st.header("Pipeline")
-        limit = st.number_input("Limite de registros", min_value=10, max_value=5000, value=370, step=10)
-        if st.button("Importar dados FIPE", type="primary"):
-            with st.spinner("Executando pipeline..."):
-                from app.pipeline.fipe_import import importar_dados_fipe
+    with st.container(border=True):
+        st.markdown('<div class="section-title">Execucao da coleta FIPE</div>', unsafe_allow_html=True)
+        st.caption("Acompanhe visualmente a chamada da API, o processamento dos registros e a gravacao no PostgreSQL.")
 
-                importar_dados_fipe(limite_registros=int(limit))
-                st.cache_data.clear()
-            st.success("Importacao concluida.")
-            st.rerun()
+        control_col, info_col = st.columns([1, 2])
+        with control_col:
+            limit = st.number_input(
+                "Limite de registros",
+                min_value=10,
+                max_value=5000,
+                value=370,
+                step=10,
+                help="Controla quantos registros a coleta vai buscar antes de encerrar.",
+            )
+            run_pipeline = st.button("Iniciar coleta", type="primary", use_container_width=True)
+
+        with info_col:
+            st.info(
+                "Use esta area para executar o ETL sem depender do terminal. "
+                "Durante a execucao, o painel mostra marcas processadas, registros coletados e batches gravados."
+            )
+
+        if not run_pipeline:
+            return
+
+        from app.pipeline.fipe_import import importar_dados_fipe
+
+        progress_bar = st.progress(0)
+        current_step = st.empty()
+        log_output = st.empty()
+        logs = []
+
+        def on_progress(update):
+            message = update.get("message", "")
+            if message:
+                logs.append(message)
+            progress_bar.progress(pipeline_progress_ratio(update))
+            current_step.info(message or "Executando pipeline...")
+            log_output.code("\n".join(logs[-18:]), language="text")
+
+        with st.status("Pipeline em execucao", expanded=True) as status:
+            summary = importar_dados_fipe(limite_registros=int(limit), progress_callback=on_progress)
+            st.cache_data.clear()
+            status.update(label="Pipeline concluido", state="complete")
+
+        st.success("Coleta concluida. Os dados foram atualizados no banco.")
+        render_pipeline_summary(summary)
+        st.caption("Recarregue a pagina ou altere algum filtro para atualizar os graficos com os dados mais recentes.")
 
 
 def render_empty_state():
     st.info(
         "A tabela fipe_carros ainda nao existe ou nao possui dados. "
-        "Execute o pipeline pelo terminal com `python run.py` ou use o botao de importacao na barra lateral."
+        "Execute a coleta no painel acima para carregar os dados no PostgreSQL."
     )
-    render_pipeline_action()
 
 
 def main():
-    st.title("Dashboard FIPE")
-    st.caption("Consulta e analise dos dados coletados da API FIPE e armazenados no PostgreSQL.")
+    render_page_style()
+    render_header()
+    render_pipeline_action()
 
     try:
         df = cached_data()
@@ -107,7 +283,6 @@ def main():
     df = df.dropna(subset=["valor", "ano_modelo"]).copy()
     df["ano_modelo"] = df["ano_modelo"].astype(int)
 
-    render_pipeline_action()
     filtered, max_rows = apply_filters(df)
 
     total_records = len(filtered)
@@ -116,10 +291,14 @@ def main():
     brands_count = filtered["marca"].nunique()
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Registros", f"{total_records:,}".replace(",", "."))
-    col2.metric("Marcas", f"{brands_count:,}".replace(",", "."))
-    col3.metric("Preco medio", format_currency(avg_price))
-    col4.metric("Maior preco", format_currency(max_price))
+    with col1:
+        render_kpi("Registros", f"{total_records:,}".replace(",", "."))
+    with col2:
+        render_kpi("Marcas", f"{brands_count:,}".replace(",", "."))
+    with col3:
+        render_kpi("Preco medio", format_currency(avg_price))
+    with col4:
+        render_kpi("Maior preco", format_currency(max_price))
 
     if filtered.empty:
         st.warning("Nenhum registro encontrado para os filtros selecionados.")
@@ -128,23 +307,26 @@ def main():
     tab_overview, tab_distribution, tab_table = st.tabs(["Visao geral", "Distribuicao", "Dados"])
 
     with tab_overview:
+        st.write("")
         left, right = st.columns([1.25, 1])
         with left:
-            st.subheader("Preco medio por marca")
+            st.markdown('<div class="section-title">Preco medio por marca</div>', unsafe_allow_html=True)
             st.plotly_chart(price_by_brand(filtered), use_container_width=True)
         with right:
-            st.subheader("Preco medio por combustivel")
+            st.markdown('<div class="section-title">Preco medio por combustivel</div>', unsafe_allow_html=True)
             st.plotly_chart(price_by_fuel(filtered), use_container_width=True)
 
-        st.subheader("Evolucao do preco medio por ano")
+        st.markdown('<div class="section-title">Evolucao do preco medio por ano</div>', unsafe_allow_html=True)
         st.plotly_chart(price_by_year(filtered), use_container_width=True)
 
     with tab_distribution:
-        st.subheader("Distribuicao de precos")
+        st.write("")
+        st.markdown('<div class="section-title">Distribuicao de precos</div>', unsafe_allow_html=True)
         st.plotly_chart(price_distribution(filtered), use_container_width=True)
 
     with tab_table:
-        st.subheader("Registros")
+        st.write("")
+        st.markdown('<div class="section-title">Registros filtrados</div>', unsafe_allow_html=True)
         visible_columns = [
             "marca",
             "modelo",
