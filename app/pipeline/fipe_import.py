@@ -338,9 +338,14 @@ def salvar_no_banco(df, progress_callback=None):
             valor FLOAT,
             codigo_fipe VARCHAR(20),
             sigla_combustivel VARCHAR(10),
-            data_consulta VARCHAR(50),
+            data_consulta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             CONSTRAINT unique_fipe UNIQUE (codigo_fipe, ano_modelo, combustivel)
         );
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE fipe_carros
+        ALTER COLUMN data_consulta SET DEFAULT CURRENT_TIMESTAMP
         """))
 
         if df.empty:
@@ -384,11 +389,11 @@ def salvar_no_banco(df, progress_callback=None):
         INSERT INTO fipe_carros (
             marca, modelo, ano_modelo, combustivel,
             valor_str, valor, codigo_fipe,
-            sigla_combustivel, data_consulta
+            sigla_combustivel
         ) VALUES (
             :marca, :modelo, :ano_modelo, :combustivel,
             :valor_str, :valor, :codigo_fipe,
-            :sigla_combustivel, :data_consulta
+            :sigla_combustivel
         )
         ON CONFLICT (codigo_fipe, ano_modelo, combustivel)
         DO NOTHING
