@@ -324,7 +324,6 @@ def _limpar_valor(valor):
     except (ValueError, AttributeError):
         return None
 
-
 def salvar_no_banco(df, progress_callback=None):
     with engine.begin() as conn:
         conn.execute(text("""
@@ -338,14 +337,14 @@ def salvar_no_banco(df, progress_callback=None):
             valor FLOAT,
             codigo_fipe VARCHAR(20),
             sigla_combustivel VARCHAR(10),
-            data_consulta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            data_consulta DATE DEFAULT CURRENT_DATE,
             CONSTRAINT unique_fipe UNIQUE (codigo_fipe, ano_modelo, combustivel)
         );
         """))
 
         conn.execute(text("""
         ALTER TABLE fipe_carros
-        ALTER COLUMN data_consulta SET DEFAULT CURRENT_TIMESTAMP
+        ALTER COLUMN data_consulta SET DEFAULT CURRENT_DATE
         """))
 
         if df.empty:
