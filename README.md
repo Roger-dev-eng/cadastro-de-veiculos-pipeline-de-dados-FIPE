@@ -85,9 +85,7 @@ Interface web em **Streamlit** com:
 
 
 #### `run.py`
-Executa a pipeline completa, incluindo:
-1. Coleta dos dados FIPE.
-2. Armazenamento no banco.
+Inicia o dashboard Streamlit, que já permite executar a coleta FIPE e acompanhar os dados no navegador.
 
 
 ---
@@ -100,16 +98,10 @@ Instale as dependências:
 pip install -r requirements.txt
 ```
 
-Execute a pipeline para carregar dados no PostgreSQL:
+Inicie o dashboard e use a própria interface para executar a coleta e ver as análises:
 
 ```bash
 python run.py
-```
-
-Abra o dashboard Streamlit:
-
-```bash
-streamlit run app/dashboard/dashboard.py
 ```
 
 ## Como executar com Docker
