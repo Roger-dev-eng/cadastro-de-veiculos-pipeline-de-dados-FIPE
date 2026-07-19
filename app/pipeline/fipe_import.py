@@ -57,7 +57,9 @@ def _save_cache():
             return
         data = dict(_cache)
         _cache_dirty = False
-    os.makedirs(os.path.dirname(_CACHE_PATH), exist_ok=True)
+    cache_dir = os.path.dirname(_CACHE_PATH)
+    if cache_dir:
+        os.makedirs(cache_dir, exist_ok=True)
     with open(_CACHE_PATH, "w", encoding="utf-8") as cache_file:
         json.dump(data, cache_file, ensure_ascii=True)
 
@@ -376,6 +378,7 @@ def salvar_no_banco(df, progress_callback=None):
         total_inserido = 0
         total_validos = len(df)
         total_batches = (len(df) + batch_size - 1) // batch_size
+        batch_failures = []
 
         insert_sql = text("""
         INSERT INTO fipe_carros (
@@ -420,6 +423,7 @@ def salvar_no_banco(df, progress_callback=None):
                         "existing": (i + len(batch)) - total_inserido,
                     })
             except Exception as e:
+                batch_failures.append((batch_number, e))
                 _emit(
                     progress_callback,
                     "save_error",
@@ -428,6 +432,13 @@ def salvar_no_banco(df, progress_callback=None):
                     total=total_batches,
                 )
                 continue
+
+        if batch_failures:
+            primeiro_batch, primeiro_erro = batch_failures[0]
+            raise RuntimeError(
+                f"Falha ao salvar {len(batch_failures)} batch(s) na tabela fipe_carros; "
+                f"primeiro erro no batch {primeiro_batch}: {primeiro_erro}"
+            )
 
         _emit(
             progress_callback,

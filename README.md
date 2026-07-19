@@ -53,10 +53,6 @@ cadastro-veiculos/
 │
 ├── requirements.txt
 │
-├── pyproject.toml            # Metadados e dependências do projeto
-│
-├── .python-version           # Versão do Python (pyenv)
-│
 ├── .env                      # Configuração local das variáveis de ambiente
 │
 └── README.md
